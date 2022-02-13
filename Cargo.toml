@@ -4,6 +4,10 @@ version = "0.1.0"
 edition = "2021"
 rust-version = "1.60.0"
 
+[lib]
+name="vintt3"
+path="lib/lib.rs"
+
 [[bin]]
 name="timertest"
 path="src/timertest.rs"
@@ -12,6 +16,12 @@ path="src/timertest.rs"
 name="processtest"
 path="src/processtest.rs"
 
+[[bin]]
+name="configtest"
+path="src/configtest.rs"
+
 [dependencies]
 tokio = {version="1.16.1",features=["time","macros","rt-multi-thread"]}
 sysinfo = "0.23.2"
+serde = {version="1.0.136",features=["derive"]}
+serde_yaml = "0.8.23"

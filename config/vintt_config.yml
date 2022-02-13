@@ -1,0 +1,12 @@
+track_items:
+  notepad.exe:
+    display_name: notepad
+    categories: []
+
+  Obsidian.exe:
+    display_name: obsidian
+    categories: []
+
+  hello there.exe:
+    display_name: 222
+    categories: []
