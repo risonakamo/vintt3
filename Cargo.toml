@@ -8,5 +8,10 @@ rust-version = "1.60.0"
 name="timertest"
 path="src/timertest.rs"
 
+[[bin]]
+name="processtest"
+path="src/processtest.rs"
+
 [dependencies]
 tokio = {version="1.16.1",features=["time","macros","rt-multi-thread"]}
+sysinfo = "0.23.2"
