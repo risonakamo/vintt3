@@ -1,0 +1,12 @@
+[package]
+name = "vintt3"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.60.0"
+
+[[bin]]
+name="timertest"
+path="src/timertest.rs"
+
+[dependencies]
+tokio = {version="1.16.1",features=["time","macros","rt-multi-thread"]}
