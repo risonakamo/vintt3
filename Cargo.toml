@@ -8,21 +8,21 @@ rust-version = "1.60.0"
 name="vintt3"
 path="lib/lib.rs"
 
-[[bin]]
-name="timertest"
-path="src/timertest.rs"
-
-[[bin]]
-name="processtest"
-path="src/processtest.rs"
-
-[[bin]]
-name="configtest"
-path="src/configtest.rs"
-
 [dependencies]
 tokio = {version="1.16.1",features=["time","macros","rt-multi-thread"]}
 sysinfo = "0.23.2"
 serde = {version="1.0.136",features=["derive"]}
 serde_yaml = "0.8.23"
 thiserror = "1.0.30"
+
+# [[bin]]
+# name="timertest"
+# path="src/timertest.rs"
+
+# [[bin]]
+# name="processtest"
+# path="src/processtest.rs"
+
+# [[bin]]
+# name="configtest"
+# path="src/configtest.rs"
