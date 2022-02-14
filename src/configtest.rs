@@ -3,7 +3,7 @@ use std::io::BufReader;
 use std::result;
 use serde_yaml;
 
-use vintt3::types::vintt_config_types::VinttConfig;
+use vintt3::VinttConfig::VinttConfig;
 use vintt3::types::errors::SerdeFileError;
 
 fn main()->result::Result<(),SerdeFileError>
