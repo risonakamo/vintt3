@@ -1,12 +1,12 @@
 use std::fs::File;
-use std::io;
 use std::io::BufReader;
-use std::error;
 use std::result;
+use serde_yaml;
 
 use vintt3::types::vintt_config_types::VinttConfig;
+use vintt3::types::errors::SerdeFileError;
 
-fn main()->result::Result<(),Box<dyn error::Error>>
+fn main()->result::Result<(),SerdeFileError>
 {
     let file:File=File::open("config/vintt_config.yml")?;
     let reader=BufReader::new(file);
