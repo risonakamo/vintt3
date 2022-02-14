@@ -8,7 +8,7 @@ pub struct VinttConfig
 }
 
 #[derive(Deserialize,Debug)]
-pub struct VinttItem
+struct VinttItem
 {
     display_name:String,
     categories:Vec<String>
@@ -19,8 +19,10 @@ impl VinttConfig
     /// get all track processes as Set
     fn getProcessNames(&self)->HashSet<String>
     {
-        return HashSet::from_iter(self.track_items.iter().map(|(i,x):(&String,&VinttItem)|->String {
-            return i.clone();
-        }));
+        return HashSet::from_iter(self.track_items.iter().map(
+            |(i,_):(&String,&VinttItem)|->String {
+                return i.clone();
+            }
+        ));
     }
 }
