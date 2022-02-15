@@ -15,6 +15,10 @@ serde = {version="1.0.136",features=["derive"]}
 serde_yaml = "0.8.23"
 thiserror = "1.0.30"
 
+[[bin]]
+name="timefiletest"
+path="src/timefiletest.rs"
+
 # [[bin]]
 # name="timertest"
 # path="src/timertest.rs"

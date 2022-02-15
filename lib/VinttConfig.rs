@@ -1,9 +1,11 @@
 use std::collections::{HashMap,HashSet};
 use serde::{Deserialize};
 
+/// full vintt config yml file
 #[derive(Deserialize,Debug)]
 pub struct VinttConfig
 {
+    // key is process name
     track_items:HashMap<String,VinttItem>
 }
 

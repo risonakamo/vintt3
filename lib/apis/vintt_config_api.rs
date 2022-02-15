@@ -1,3 +1,5 @@
+// functions for reading vintt config from file
+
 use std::fs::File;
 use std::io::BufReader;
 use std::result::Result;
