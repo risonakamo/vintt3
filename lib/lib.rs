@@ -5,3 +5,5 @@ pub mod types;
 pub mod apis;
 
 pub mod VinttConfig;
+pub mod VinttWatcher;
+pub mod process_watch;

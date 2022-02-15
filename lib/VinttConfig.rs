@@ -8,11 +8,11 @@ use serde::{Deserialize};
 pub struct VinttConfig
 {
     // key is process name
-    track_items:HashMap<String,VinttItem>
+    pub track_items:HashMap<String,VinttItem>
 }
 
-#[derive(Deserialize,Debug)]
-struct VinttItem
+#[derive(Deserialize,Debug,Clone)]
+pub struct VinttItem
 {
     display_name:String,
     categories:Vec<String>
