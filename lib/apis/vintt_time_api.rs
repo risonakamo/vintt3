@@ -11,7 +11,7 @@ use std::collections::HashMap;
 use crate::types::vintt_time::{VinttTimeFile,VinttTime};
 use crate::types::errors::SerdeFileError;
 
-fn incrementTime(
+pub fn incrementTime(
     process:&str,
     category:&str,
     time:u64,

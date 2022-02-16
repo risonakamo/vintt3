@@ -3,11 +3,14 @@ use tokio::time::{interval,Interval};
 use std::time::Duration;
 use std::collections::HashSet;
 
+/// time between checking process list
+const WAIT_INTERVAL:u64=3;
+
 /// wait for a process in the given list to exist. CONSUMES the input vector
 pub async fn waitForAProcess(targets:Vec<&String>)->String
 {
     let mut system:System=System::new_all();
-    let mut timer:Interval=interval(Duration::from_secs(3));
+    let mut timer:Interval=interval(Duration::from_secs(WAIT_INTERVAL));
 
     let targetSet:HashSet<&String>=HashSet::from_iter(targets);
 
