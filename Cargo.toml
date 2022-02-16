@@ -16,8 +16,12 @@ serde_yaml = "0.8.23"
 thiserror = "1.0.30"
 
 [[bin]]
-name="timefiletest"
-path="src/timefiletest.rs"
+name="vintt3"
+path="src/vintt3.rs"
+
+# [[bin]]
+# name="timefiletest"
+# path="src/timefiletest.rs"
 
 # [[bin]]
 # name="timertest"

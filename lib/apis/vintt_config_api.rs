@@ -10,7 +10,7 @@ use crate::VinttConfig::VinttConfig;
 use crate::types::errors::SerdeFileError;
 
 /// read vintt config from yaml file
-fn getVinttConfig(target:&str)->Result<VinttConfig,SerdeFileError>
+pub fn getVinttConfig(target:&str)->Result<VinttConfig,SerdeFileError>
 {
     let file:File=File::open(target)?;
     let reader:BufReader<File>=BufReader::new(file);

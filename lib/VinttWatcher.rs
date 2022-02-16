@@ -6,7 +6,7 @@ use crate::VinttConfig::{VinttConfig,VinttItem};
 use crate::process_watch::waitForAProcess;
 use crate::apis::vintt_time_api::incrementTime;
 
-struct VinttWatcher
+pub struct VinttWatcher
 {
     timefile:String,
 
@@ -35,8 +35,8 @@ impl VinttWatcher
     }
 
     /// begin main watch loop. when find a program from the vintt config, begins writing to
-    /// time file.
-    pub async fn watch(&mut self,config:&VinttConfig)
+    /// time file. CONSUMES config
+    pub async fn watch(&mut self,config:VinttConfig)
     {
         println!("watching...");
 
@@ -45,6 +45,7 @@ impl VinttWatcher
 
         // wait until found a process
         let foundProcess:String=waitForAProcess(configProcesses).await;
+        println!("tracking: {}",foundProcess);
 
         // set the track item to be that item
         self.trackItem=config.track_items.get(&foundProcess).unwrap().clone();
@@ -56,6 +57,7 @@ impl VinttWatcher
         {
             // every 1 min
             timer.tick().await;
+            println!("writing");
 
             incrementTime(
                 &foundProcess,
