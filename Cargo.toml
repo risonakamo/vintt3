@@ -24,6 +24,10 @@ path="src/vintt3.rs"
 name="warptest"
 path="src/warptest.rs"
 
+[[bin]]
+name="asyncshare"
+path="src/asyncshare.rs"
+
 # [[bin]]
 # name="timefiletest"
 # path="src/timefiletest.rs"
