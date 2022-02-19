@@ -20,6 +20,7 @@ pub struct VinttWatcher
 
 impl VinttWatcher
 {
+    /// new vintt watcher. give path to target output timefile
     pub fn new(timefile:&str)->Self
     {
         return Self {
