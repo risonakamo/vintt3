@@ -1,6 +1,8 @@
 use tokio::time::{interval,Interval};
+use tokio::task::JoinHandle;
 use std::time::Duration;
 use std::collections::HashSet;
+use std::sync::{Arc,Mutex};
 
 use crate::VinttConfig::{VinttConfig,VinttItem};
 use crate::process_watch::waitForAProcess;
@@ -10,14 +12,13 @@ const WRITE_INTERVAL:u64=5;
 
 pub struct VinttWatcher
 {
-    timefile:String,
+    timefile:Arc<Mutex<String>>,
 
-    trackItem:VinttItem,
-    pub categories:HashSet<String>,
+    pub categories:Arc<Mutex<HashSet<String>>>,
 
-    currentCategory:String,
-    elapsedTime:u64,
-    categoryTime:u64
+    currentCategory:Arc<Mutex<String>>,
+    elapsedTime:Arc<Mutex<u64>>,
+    categoryTime:Arc<Mutex<u64>>
 }
 
 impl VinttWatcher
@@ -26,65 +27,73 @@ impl VinttWatcher
     pub fn new(timefile:&str)->Self
     {
         return Self {
-            timefile:timefile.to_string(),
+            timefile:Arc::new(Mutex::new(timefile.to_string())),
 
-            trackItem:VinttItem::default(),
-            categories:HashSet::default(),
+            categories:Arc::new(Mutex::new(HashSet::default())),
 
-            currentCategory:"".to_string(),
-            elapsedTime:0,
-            categoryTime:0
+            currentCategory:Arc::new(Mutex::new("".to_string())),
+            elapsedTime:Arc::new(Mutex::new(0)),
+            categoryTime:Arc::new(Mutex::new(0))
         };
     }
 
     /// begin main watch loop. when find a program from the vintt config, begins writing to
     /// time file. CONSUMES config
-    pub async fn watch(&mut self,config:VinttConfig)
+    pub fn watch(&self,config:VinttConfig)->JoinHandle<()>
     {
         println!("watching...");
 
-        // get all processes to watch for
-        let configProcesses:Vec<&String>=config.track_items.keys().collect();
+        let categoriesArc=self.categories.clone();
+        let currentCategoryArc=self.currentCategory.clone();
+        let elapsedTimeArc=self.elapsedTime.clone();
+        let categoryTimeArc=self.categoryTime.clone();
+        let timefileArc=self.timefile.clone();
 
-        // wait until found a process
-        let foundProcess:String=waitForAProcess(configProcesses).await;
-        println!("tracking: {}",foundProcess);
+        return tokio::spawn(async move {
+            // get all processes to watch for
+            let configProcesses:Vec<&String>=config.track_items.keys().collect();
 
-        // set the track item to be that item
-        self.trackItem=config.track_items.get(&foundProcess).unwrap().clone();
-        self.categories=HashSet::from_iter(self.trackItem.categories.clone().into_iter());
+            // wait until found a process
+            let foundProcess:String=waitForAProcess(configProcesses).await;
+            println!("tracking: {}",foundProcess);
 
-        let mut timer:Interval=interval(Duration::from_secs(WRITE_INTERVAL));
+            // set the track item to be that item
+            let trackItem:VinttItem=config.track_items.get(&foundProcess).unwrap().clone();
+            *(categoriesArc.lock().unwrap())=HashSet::from_iter(trackItem.categories.into_iter());
 
-        loop
-        {
-            // every 1 min
-            timer.tick().await;
-            println!("writing");
+            let mut timer:Interval=interval(Duration::from_secs(WRITE_INTERVAL));
 
-            incrementTime(
-                &foundProcess,
-                &self.currentCategory,
-                1,
-                &self.timefile
-            ).unwrap();
-            self.elapsedTime+=1;
-            self.categoryTime+=1;
-        }
+            loop
+            {
+                // every 1 min
+                timer.tick().await;
+                println!("writing");
+
+                incrementTime(
+                    &foundProcess,
+                    &currentCategoryArc.lock().unwrap(),
+                    1,
+                    &timefileArc.lock().unwrap()
+                ).unwrap();
+
+                *(elapsedTimeArc.lock().unwrap())+=1;
+                *(categoryTimeArc.lock().unwrap())+=1;
+            }
+        });
     }
 
     /// attempt to change current category. only allowed to change category to something that is
     /// valid for the current item
     pub fn changeCategory(&mut self,newCategory:&str)->Result<(),String>
     {
-        if !self.categories.contains(newCategory)
+        if !self.categories.lock().unwrap().contains(newCategory)
         {
             return Err("INVALID_CATEGORY".to_string());
         }
 
         println!("changing category: {}",newCategory);
-        self.currentCategory=newCategory.to_string();
-        self.categoryTime=0;
+        *(self.currentCategory.lock().unwrap())=newCategory.to_string();
+        *(self.categoryTime.lock().unwrap())=0;
         return Ok(());
     }
 }

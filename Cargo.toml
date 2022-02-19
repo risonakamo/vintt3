@@ -20,13 +20,13 @@ warp = "0.3.2"
 name="vintt3"
 path="src/vintt3.rs"
 
-[[bin]]
-name="warptest"
-path="src/warptest.rs"
+# [[bin]]
+# name="warptest"
+# path="src/warptest.rs"
 
-[[bin]]
-name="asyncshare"
-path="src/asyncshare.rs"
+# [[bin]]
+# name="asyncshare"
+# path="src/asyncshare.rs"
 
 # [[bin]]
 # name="timefiletest"
