@@ -21,6 +21,10 @@ name="vintt3"
 path="src/vintt3.rs"
 
 # [[bin]]
+# name="mutextest"
+# path="src/mutextest.rs"
+
+# [[bin]]
 # name="warptest"
 # path="src/warptest.rs"
 
