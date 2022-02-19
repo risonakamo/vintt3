@@ -2,7 +2,7 @@
 
 use std::env::current_exe;
 use std::path::PathBuf;
-use tokio::time::{sleep,Duration};
+use warp::Filter;
 
 use vintt3::VinttWatcher::VinttWatcher;
 use vintt3::apis::vintt_config_api::getVinttConfig;
@@ -17,10 +17,14 @@ async fn main()
         currentDir.join("vintt_config.yml").to_str().unwrap()
     ).unwrap());
 
-    sleep(Duration::from_secs(10)).await;
-    println!("changing");
-    watcher.changeCategory("something").unwrap();
-    println!("done changing");
+    let test=warp::path("test").map(||->String {
+        return "hello".to_string();
+    });
 
-    tokio::join!(watcherTask);
+    let routes=warp::get().and(test);
+
+    warp::serve(routes).run((
+        [0,0,0,0],
+        4200
+    )).await;
 }
