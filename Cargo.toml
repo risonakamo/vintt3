@@ -9,15 +9,20 @@ name="vintt3"
 path="lib/lib.rs"
 
 [dependencies]
-tokio = {version="1.16.1",features=["time","macros","rt-multi-thread"]}
+tokio = {version="1.16.1",features=["full"]}
 sysinfo = "0.23.2"
 serde = {version="1.0.136",features=["derive"]}
 serde_yaml = "0.8.23"
 thiserror = "1.0.30"
+warp = "0.3.2"
 
 [[bin]]
 name="vintt3"
 path="src/vintt3.rs"
+
+[[bin]]
+name="warptest"
+path="src/warptest.rs"
 
 # [[bin]]
 # name="timefiletest"
