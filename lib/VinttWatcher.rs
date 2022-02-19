@@ -6,6 +6,8 @@ use crate::VinttConfig::{VinttConfig,VinttItem};
 use crate::process_watch::waitForAProcess;
 use crate::apis::vintt_time_api::incrementTime;
 
+const WRITE_INTERVAL:u64=5;
+
 pub struct VinttWatcher
 {
     timefile:String,
@@ -52,7 +54,7 @@ impl VinttWatcher
         self.trackItem=config.track_items.get(&foundProcess).unwrap().clone();
         self.categories=HashSet::from_iter(self.trackItem.categories.clone().into_iter());
 
-        let mut timer:Interval=interval(Duration::from_secs(60));
+        let mut timer:Interval=interval(Duration::from_secs(WRITE_INTERVAL));
 
         loop
         {
@@ -80,6 +82,7 @@ impl VinttWatcher
             return Err("INVALID_CATEGORY".to_string());
         }
 
+        println!("changing category: {}",newCategory);
         self.currentCategory=newCategory.to_string();
         self.categoryTime=0;
         return Ok(());

@@ -1,7 +1,8 @@
 track_items:
   notepad.exe:
     display_name: notepad
-    categories: []
+    categories:
+      - something
 
   Obsidian.exe:
     display_name: obsidian
