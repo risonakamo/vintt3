@@ -1,7 +1,7 @@
 use tokio::time::{interval,Interval};
 use tokio::task::JoinHandle;
 use std::time::Duration;
-use std::collections::{HashSet,HashMap};
+use std::collections::{HashMap};
 use std::sync::{Arc,Mutex};
 use serde::Serialize;
 
@@ -13,14 +13,18 @@ const WRITE_INTERVAL:u64=5;
 
 pub struct VinttWatcher
 {
+    // current path to time file
     timefile:Arc<Mutex<String>>,
 
+    // current program being watched
     watchProgram:Arc<Mutex<String>>,
-    pub categories:Arc<Mutex<HashSet<String>>>,
-
+    // the current category
     currentCategory:Arc<Mutex<String>>,
+
+    // total time elapsed
     elapsedTime:Arc<Mutex<u64>>,
-    categoryTime:Arc<Mutex<u64>>
+    // time elapsed within categories
+    categoryTimes:Arc<Mutex<HashMap<String,u64>>>
 }
 
 /// current watch information
@@ -45,11 +49,10 @@ impl VinttWatcher
             timefile:Arc::new(Mutex::new(timefile.to_string())),
 
             watchProgram:Arc::new(Mutex::new(String::default())),
-            categories:Arc::new(Mutex::new(HashSet::default())),
-
             currentCategory:Arc::new(Mutex::new(String::default())),
+
             elapsedTime:Arc::new(Mutex::new(0)),
-            categoryTime:Arc::new(Mutex::new(0))
+            categoryTimes:Arc::new(Mutex::new(HashMap::default()))
         };
     }
 
@@ -59,12 +62,11 @@ impl VinttWatcher
     {
         println!("watching...");
 
-        let categoriesArc=self.categories.clone();
         let currentCategoryArc=self.currentCategory.clone();
         let elapsedTimeArc=self.elapsedTime.clone();
-        let categoryTimeArc=self.categoryTime.clone();
         let timefileArc=self.timefile.clone();
         let watchProgramArc=self.watchProgram.clone();
+        let categoryTimesArc=self.categoryTimes.clone();
 
         return tokio::spawn(async move {
             // get all processes to watch for
@@ -77,7 +79,11 @@ impl VinttWatcher
 
             // set the track item to be that item
             let trackItem:VinttItem=config.track_items.get(&foundProcess).unwrap().clone();
-            *(categoriesArc.lock().unwrap())=HashSet::from_iter(trackItem.categories.into_iter());
+            *(categoryTimesArc.lock().unwrap())=HashMap::from_iter(
+                trackItem.categories.into_iter().map(|x:String|->(String,u64) {
+                    return (x,0);
+                })
+            );
 
             let mut timer:Interval=interval(Duration::from_secs(WRITE_INTERVAL));
 
@@ -86,16 +92,17 @@ impl VinttWatcher
                 // every 1 min
                 timer.tick().await;
                 println!("writing");
+                let currentCat:String=currentCategoryArc.lock().unwrap().clone();
 
                 incrementTime(
                     &foundProcess,
-                    &currentCategoryArc.lock().unwrap(),
+                    &currentCat,
                     1,
                     &timefileArc.lock().unwrap()
                 ).unwrap();
 
                 *(elapsedTimeArc.lock().unwrap())+=1;
-                *(categoryTimeArc.lock().unwrap())+=1;
+                *(categoryTimesArc.lock().unwrap()).get_mut(&currentCat).unwrap()+=1;
             }
         });
     }
@@ -104,14 +111,13 @@ impl VinttWatcher
     /// valid for the current item
     pub fn changeCategory(&mut self,newCategory:&str)->Result<(),String>
     {
-        if !self.categories.lock().unwrap().contains(newCategory)
+        if !self.categoryTimes.lock().unwrap().contains_key(newCategory)
         {
             return Err("INVALID_CATEGORY".to_string());
         }
 
         println!("changing category: {}",newCategory);
         *(self.currentCategory.lock().unwrap())=newCategory.to_string();
-        *(self.categoryTime.lock().unwrap())=0;
         return Ok(());
     }
 
@@ -129,7 +135,7 @@ impl VinttWatcher
             currentTime:self.elapsedTime.lock().unwrap().clone(),
             currentCategory:self.currentCategory.lock().unwrap().clone(),
 
-            categories:HashMap::default()
+            categories:self.categoryTimes.lock().unwrap().clone()
         };
     }
 }
