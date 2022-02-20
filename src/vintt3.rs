@@ -4,7 +4,7 @@ use std::env::current_exe;
 use std::path::PathBuf;
 use warp::Filter;
 
-use vintt3::VinttWatcher::VinttWatcher;
+use vintt3::VinttWatcher::{VinttWatcher,CurrentWatch};
 use vintt3::apis::vintt_config_api::getVinttConfig;
 use vintt3::types::vintt_web_api_types::SetCategoryReq;
 
@@ -34,7 +34,9 @@ async fn runWarp(watcher:&mut VinttWatcher)
     let getWatch=warp::path!("get-watch")
         .and(warp::get())
         .map(|| {
-            return "get-watch";
+            // let curWatch:CurrentWatch=watcher.getCurrentWatch();
+            // return warp::reply::json(&curWatch);
+            return "adasd";
         });
 
     // /set-category (body)
