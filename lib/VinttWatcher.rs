@@ -101,8 +101,18 @@ impl VinttWatcher
                     &timefileArc.lock().unwrap()
                 ).unwrap();
 
+                // increment current time session counter
                 *(elapsedTimeArc.lock().unwrap())+=1;
-                *(categoryTimesArc.lock().unwrap()).get_mut(&currentCat).unwrap()+=1;
+
+                // if have a category, increment the category time
+                if currentCat.len() > 0
+                {
+                    // *(categoryTimesArc.lock().unwrap()).get_mut(&currentCat).unwrap()+=1;
+                    match (*(categoryTimesArc.lock().unwrap())).get_mut(&currentCat) {
+                        None => println!("tried to increment invalid category"),
+                        Some(r) => *r+=1
+                    };
+                }
             }
         });
     }

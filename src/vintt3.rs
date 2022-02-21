@@ -3,6 +3,7 @@
 use std::env::current_exe;
 use std::path::PathBuf;
 use warp::Filter;
+use std::sync::{Arc,Mutex};
 
 use vintt3::VinttWatcher::{VinttWatcher,CurrentWatch};
 use vintt3::apis::vintt_config_api::getVinttConfig;
@@ -13,18 +14,20 @@ async fn main()
 {
     let currentDir:PathBuf=current_exe().unwrap().parent().unwrap().to_path_buf();
 
-    let mut watcher:VinttWatcher=VinttWatcher::new(currentDir.join("time.yml").to_str().unwrap());
+    let watcher:VinttWatcher=VinttWatcher::new(currentDir.join("time.yml").to_str().unwrap());
 
     watcher.watch(getVinttConfig(
         currentDir.join("vintt_config.yml").to_str().unwrap()
     ).unwrap());
 
-    runWarp(&mut watcher).await;
+    runWarp(watcher).await;
 }
 
 /// run warp apis
-async fn runWarp(watcher:&mut VinttWatcher)
+async fn runWarp(watcher:VinttWatcher)
 {
+    let watcherArc=Arc::new(Mutex::new(watcher));
+
     let root=warp::path::end().map(|| {
         return "hey";
     });
@@ -33,10 +36,9 @@ async fn runWarp(watcher:&mut VinttWatcher)
     // get current watch information
     let getWatch=warp::path!("get-watch")
         .and(warp::get())
-        .map(|| {
-            // let curWatch:CurrentWatch=watcher.getCurrentWatch();
-            // return warp::reply::json(&curWatch);
-            return "adasd";
+        .map(move || {
+            let curWatch:CurrentWatch=watcherArc.lock().unwrap().getCurrentWatch();
+            return warp::reply::json(&curWatch);
         });
 
     // /set-category (body)

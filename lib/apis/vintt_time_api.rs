@@ -11,6 +11,8 @@ use std::collections::HashMap;
 use crate::types::vintt_time::{VinttTimeFile,VinttTime};
 use crate::types::errors::SerdeFileError;
 
+/// increment time to the timefile. if category is empty, does not increment any category
+/// always increments total time
 pub fn incrementTime(
     process:&str,
     category:&str,
