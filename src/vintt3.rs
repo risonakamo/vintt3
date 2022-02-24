@@ -28,9 +28,7 @@ async fn runWarp(watcher:VinttWatcher)
 {
     let watcherArc=Arc::new(Mutex::new(watcher));
 
-    let root=warp::path::end().map(|| {
-        return "hey";
-    });
+    let staticWebRoot=warp::get().and(warp::fs::dir("vintt3-web/build"));
 
     // /get-watch
     // get current watch information
@@ -51,7 +49,7 @@ async fn runWarp(watcher:VinttWatcher)
             return "hello";
         });
 
-    let routes=root
+    let routes=staticWebRoot
         .or(getWatch)
         .or(setCategory);
 
