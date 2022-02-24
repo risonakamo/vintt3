@@ -1,3 +1,3 @@
 [submodule "vintt3-web"]
 	path = vintt3-web
-	url = ./vintt3-web
+	url = https://github.com/risonakamo/vintt3-web.git
