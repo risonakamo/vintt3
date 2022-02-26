@@ -55,7 +55,8 @@ async fn runWarp(watcher:VinttWatcher)
 
     let routes=staticWebRoot
         .or(getWatch)
-        .or(setCategory);
+        .or(setCategory)
+        .with(warp::log("warp"));
 
     warp::serve(routes).run((
         [0,0,0,0],
