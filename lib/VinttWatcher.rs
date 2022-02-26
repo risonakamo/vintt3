@@ -19,6 +19,8 @@ pub struct VinttWatcher
 
     // current program being watched
     watchProgram:Arc<Mutex<String>>,
+    // display name
+    watchName:Arc<Mutex<String>>,
     // the current category
     currentCategory:Arc<Mutex<String>>,
 
@@ -55,6 +57,7 @@ impl VinttWatcher
             timefile:Arc::new(Mutex::new(timefile.to_string())),
 
             watchProgram:Arc::new(Mutex::new(String::default())),
+            watchName:Arc::new(Mutex::new(String::default())),
             currentCategory:Arc::new(Mutex::new(String::default())),
 
             elapsedTime:Arc::new(Mutex::new(0)),
@@ -76,6 +79,7 @@ impl VinttWatcher
         let watchProgramArc=self.watchProgram.clone();
         let categoryTimesArc=self.categoryTimes.clone();
         let totalTimeArc=self.totalTime.clone();
+        let watchNameArc=self.watchName.clone();
 
         return tokio::spawn(async move {
             // get all processes to watch for
@@ -88,6 +92,11 @@ impl VinttWatcher
 
             // set the track item to be that item
             let trackItem:VinttItem=config.track_items.get(&foundProcess).unwrap().clone();
+
+            // set current display name
+            *(watchNameArc.lock().unwrap())=trackItem.display_name.clone();
+
+            // initialise category times
             *(categoryTimesArc.lock().unwrap())=HashMap::from_iter(
                 trackItem.categories.into_iter().map(|x:String|->(String,u64) {
                     return (x,0);
@@ -161,7 +170,7 @@ impl VinttWatcher
         }
 
         return CurrentWatch {
-            name:self.watchProgram.lock().unwrap().clone(),
+            name:self.watchName.lock().unwrap().clone(),
 
             currentTime:self.elapsedTime.lock().unwrap().clone(),
             currentCategory:self.currentCategory.lock().unwrap().clone(),
