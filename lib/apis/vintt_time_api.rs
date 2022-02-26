@@ -51,6 +51,17 @@ pub fn incrementTime(
     return Ok(());
 }
 
+/// get total time of an item from time file
+pub fn getTime(process:&str,filepath:&str)->Option<u64>
+{
+    let timeFile:VinttTimeFile=getVinttTimeFile(filepath);
+
+    match timeFile.tracked_items.get(process) {
+        Some(r) => return Some(r.total_time),
+        None => return None
+    };
+}
+
 /// get vintt time file. returns default if failed to find file
 fn getVinttTimeFile(path:&str)->VinttTimeFile
 {

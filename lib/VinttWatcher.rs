@@ -4,11 +4,11 @@ use std::time::Duration;
 use std::collections::{HashMap};
 use std::sync::{Arc,Mutex};
 use serde::Serialize;
-use log::info;
+use log::{info,warn};
 
 use crate::VinttConfig::{VinttConfig,VinttItem};
 use crate::process_watch::waitForAProcess;
-use crate::apis::vintt_time_api::incrementTime;
+use crate::apis::vintt_time_api::{incrementTime,getTime};
 
 const WRITE_INTERVAL:u64=5;
 
@@ -22,10 +22,13 @@ pub struct VinttWatcher
     // the current category
     currentCategory:Arc<Mutex<String>>,
 
-    // total time elapsed
+    // total time elapsed (current session)
     elapsedTime:Arc<Mutex<u64>>,
     // time elapsed within categories
-    categoryTimes:Arc<Mutex<HashMap<String,u64>>>
+    categoryTimes:Arc<Mutex<HashMap<String,u64>>>,
+
+    // total time
+    totalTime:Arc<Mutex<u64>>
 }
 
 /// current watch information
@@ -36,6 +39,8 @@ pub struct CurrentWatch
 
     currentTime:u64,
     currentCategory:String,
+
+    totalTime:u64,
 
     // all categories of the current watch and their times
     categories:HashMap<String,u64>
@@ -53,7 +58,9 @@ impl VinttWatcher
             currentCategory:Arc::new(Mutex::new(String::default())),
 
             elapsedTime:Arc::new(Mutex::new(0)),
-            categoryTimes:Arc::new(Mutex::new(HashMap::default()))
+            categoryTimes:Arc::new(Mutex::new(HashMap::default())),
+
+            totalTime:Arc::new(Mutex::new(0))
         };
     }
 
@@ -68,6 +75,7 @@ impl VinttWatcher
         let timefileArc=self.timefile.clone();
         let watchProgramArc=self.watchProgram.clone();
         let categoryTimesArc=self.categoryTimes.clone();
+        let totalTimeArc=self.totalTime.clone();
 
         return tokio::spawn(async move {
             // get all processes to watch for
@@ -85,6 +93,15 @@ impl VinttWatcher
                     return (x,0);
                 })
             );
+
+            *(totalTimeArc.lock().unwrap())=match getTime(&foundProcess,&timefileArc.lock().unwrap()) {
+                Some(r) => r,
+                None => {
+                    warn!("attempted to set total time to non-existant field");
+                    0
+                }
+            };
+            info!("using total time: {}",totalTimeArc.lock().unwrap());
 
             let mut timer:Interval=interval(Duration::from_secs(WRITE_INTERVAL));
 
@@ -104,6 +121,9 @@ impl VinttWatcher
 
                 // increment current time session counter
                 *(elapsedTimeArc.lock().unwrap())+=1;
+
+                // increment total time counter
+                *(totalTimeArc.lock().unwrap())+=1;
 
                 // if have a category, increment the category time
                 if currentCat.len() > 0
@@ -146,7 +166,9 @@ impl VinttWatcher
             currentTime:self.elapsedTime.lock().unwrap().clone(),
             currentCategory:self.currentCategory.lock().unwrap().clone(),
 
-            categories:self.categoryTimes.lock().unwrap().clone()
+            categories:self.categoryTimes.lock().unwrap().clone(),
+
+            totalTime:self.totalTime.lock().unwrap().clone()
         };
     }
 }
