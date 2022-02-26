@@ -4,6 +4,7 @@ use std::time::Duration;
 use std::collections::{HashMap};
 use std::sync::{Arc,Mutex};
 use serde::Serialize;
+use log::info;
 
 use crate::VinttConfig::{VinttConfig,VinttItem};
 use crate::process_watch::waitForAProcess;
@@ -91,7 +92,7 @@ impl VinttWatcher
             {
                 // every 1 min
                 timer.tick().await;
-                println!("writing");
+                info!("writing");
                 let currentCat:String=currentCategoryArc.lock().unwrap().clone();
 
                 incrementTime(

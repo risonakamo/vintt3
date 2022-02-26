@@ -4,6 +4,7 @@ use std::env::current_exe;
 use std::path::PathBuf;
 use warp::Filter;
 use std::sync::{Arc,Mutex};
+use log::info;
 
 use vintt3::VinttWatcher::{VinttWatcher,CurrentWatch};
 use vintt3::apis::vintt_config_api::getVinttConfig;
@@ -12,6 +13,8 @@ use vintt3::types::vintt_web_api_types::SetCategoryReq;
 #[tokio::main]
 async fn main()
 {
+    pretty_env_logger::init();
+
     let currentDir:PathBuf=current_exe().unwrap().parent().unwrap().to_path_buf();
 
     let watcher:VinttWatcher=VinttWatcher::new(currentDir.join("time.yml").to_str().unwrap());
@@ -35,6 +38,7 @@ async fn runWarp(watcher:VinttWatcher)
     let getWatch=warp::path!("get-watch")
         .and(warp::get())
         .map(move || {
+            info!("route: get-watch");
             let curWatch:CurrentWatch=watcherArc.lock().unwrap().getCurrentWatch();
             return warp::reply::json(&curWatch);
         });
