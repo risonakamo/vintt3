@@ -10,6 +10,14 @@ use vintt3::VinttWatcher::{VinttWatcher,CurrentWatch};
 use vintt3::apis::vintt_config_api::getVinttConfig;
 use vintt3::types::vintt_web_api_types::SetCategoryReq;
 
+// debug paths
+const VINTT_CONFIG_PATH:&str="../../testconfig/vintt_config.yml";
+const TIMEFILE_PATH:&str="../../testconfig/time.yml";
+
+// release paths
+// const VINTT_CONFIG_PATH:&str="vintt_config.yml";
+// const TIMEFILE_PATH:&str="time.yml";
+
 #[tokio::main]
 async fn main()
 {
@@ -17,10 +25,10 @@ async fn main()
 
     let currentDir:PathBuf=current_exe().unwrap().parent().unwrap().to_path_buf();
 
-    let watcher:VinttWatcher=VinttWatcher::new(currentDir.join("time.yml").to_str().unwrap());
+    let watcher:VinttWatcher=VinttWatcher::new(currentDir.join(TIMEFILE_PATH).to_str().unwrap());
 
     watcher.watch(getVinttConfig(
-        currentDir.join("vintt_config.yml").to_str().unwrap()
+        currentDir.join(VINTT_CONFIG_PATH).to_str().unwrap()
     ).unwrap());
 
     runWarp(watcher).await;
